@@ -1,12 +1,10 @@
-# -*- encoding : utf-8 -*-
-require File.expand_path('spec/spec_helper.rb')
+require File.expand_path("spec/spec_helper.rb")
 
 describe Saulabs::TrueSkill::FactorGraph, "Unit Tests" do
-
   before :each do
     @teams = create_teams
     @skill = @teams[0][0]
-    @results = { @team1 => 1, @team2 => 2, @team3 => 3 }
+    @results = {@team1 => 1, @team2 => 2, @team3 => 3}
     @graph = TrueSkill::FactorGraph.new(@results)
   end
 
@@ -32,28 +30,26 @@ end
 describe Saulabs::TrueSkill::FactorGraph, "Integration Tests" do
   context "When there are two teams" do
     let :team1 do # Each team needs unique instances as we modify by side effect
-      [TrueSkill::Rating.new(25.0, 25.0/3.0, 1.0, 25.0/300.0)]
+      [TrueSkill::Rating.new(25.0, 25.0 / 3.0, 1.0, 25.0 / 300.0)]
     end
 
     let :team2 do # Each team needs unique instances as we modify by side effect
-      [TrueSkill::Rating.new(25.0, 25.0/3.0, 1.0, 25.0/300.0)]
+      [TrueSkill::Rating.new(25.0, 25.0 / 3.0, 1.0, 25.0 / 300.0)]
     end
 
     let :teams do
-      [team1,team2]
+      [team1, team2]
     end
 
     let :results do
-      { team1 => 1, team2 => 2 }
+      {team1 => 1, team2 => 2}
     end
 
     let(:draw_results) do
-      { team1 => 1, team2 => 1 }
+      {team1 => 1, team2 => 1}
     end
     context "and exactly two players" do
-
-      describe 'team1 win with standard rating' do
-
+      describe "team1 win with standard rating" do
         before :each do
           TrueSkill::FactorGraph.new(results).update_skills
         end
@@ -65,12 +61,10 @@ describe Saulabs::TrueSkill::FactorGraph, "Integration Tests" do
         it "should change second players rating to [20.6041679, 7.1714755]" do
           expect(teams[1][0]).to eql_rating(20.6041679, 7.1714755)
         end
-
       end
     end
 
-    describe 'draw with standard rating' do
-
+    describe "draw with standard rating" do
       before :each do
         TrueSkill::FactorGraph.new(draw_results).update_skills
       end
@@ -82,12 +76,11 @@ describe Saulabs::TrueSkill::FactorGraph, "Integration Tests" do
       it "should change second players rating to [25.0, 6.4575196]" do
         expect(teams[1][0]).to eql_rating(25.0, 6.4575196)
       end
-
     end
 
-    describe 'draw with different ratings' do
+    describe "draw with different ratings" do
       let :team2 do
-        [TrueSkill::Rating.new(50.0, 12.5, 1.0, 25.0/300.0)]
+        [TrueSkill::Rating.new(50.0, 12.5, 1.0, 25.0 / 300.0)]
       end
 
       before :each do
@@ -101,26 +94,25 @@ describe Saulabs::TrueSkill::FactorGraph, "Integration Tests" do
       it "should change second players mean to [35.0107, 7.9101]" do
         expect(teams[1][0]).to eql_rating(35.010653, 7.910077)
       end
-
     end
 
     context "when it is a 1 vs 2" do
       let :team2 do
         [
-          TrueSkill::Rating.new(25.0, 25.0/3.0, 1.0, 25.0/300.0),
-          TrueSkill::Rating.new(25.0, 25.0/3.0, 1.0, 25.0/300.0)
+          TrueSkill::Rating.new(25.0, 25.0 / 3.0, 1.0, 25.0 / 300.0),
+          TrueSkill::Rating.new(25.0, 25.0 / 3.0, 1.0, 25.0 / 300.0)
         ]
       end
 
       context "and the skills are additive" do
-        describe "#@skill_update" do
+        describe @skill_update.to_s do
           it "should have a Boolean @skills_additive = false" do
-            @graph = TrueSkill::FactorGraph.new(draw_results, {:skills_additive => false})
+            @graph = TrueSkill::FactorGraph.new(draw_results, {skills_additive: false})
             expect(@graph.skills_additive).to be_falsey
           end
 
           it "should update the mean of the first player in team1 to 25.0 after draw" do
-            @graph = TrueSkill::FactorGraph.new(draw_results, {:skills_additive => false})
+            @graph = TrueSkill::FactorGraph.new(draw_results, {skills_additive: false})
 
             @graph.update_skills
             expect(teams[0][0].mean).to be_within(tolerance).of(25.0)
@@ -129,8 +121,4 @@ describe Saulabs::TrueSkill::FactorGraph, "Integration Tests" do
       end
     end
   end
-
-
-
-  
 end

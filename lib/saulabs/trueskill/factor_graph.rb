@@ -1,9 +1,6 @@
-# -*- encoding : utf-8 -*-
 module Saulabs
   module TrueSkill
-
     class FactorGraph
-
       # @return [Array<Array<TrueSkill::Rating>>]
       attr_reader :teams
 
@@ -24,7 +21,6 @@ module Saulabs
 
       # @return [Boolean]
       attr_reader :skills_additive
-
 
       # Creates a new trueskill factor graph for calculating the new skills based on the given game parameters
       #
@@ -70,10 +66,10 @@ module Saulabs
         @ranks = ranks_teams_hash.values
 
         opts = {
-            :beta => 25/6.0,
-            :draw_probability => 0.1,
-            :skills_additive => true
-          }.merge(options)
+          beta: 25 / 6.0,
+          draw_probability: 0.1,
+          skills_additive: true
+        }.merge(options)
 
         @beta = opts[:beta]
         @draw_probability = opts[:draw_probability]
@@ -88,20 +84,19 @@ module Saulabs
           Layers::PerformancesToTeamPerformances.new(self, @skills_additive),
           Layers::IteratedTeamPerformances.new(self,
             Layers::TeamPerformanceDifferences.new(self),
-            Layers::TeamDifferenceComparision.new(self, @ranks)
-          )
+            Layers::TeamDifferenceComparision.new(self, @ranks))
         ]
       end
 
       def draw_margin
-        Gauss::Distribution.inv_cdf(0.5*(@draw_probability + 1)) * Math.sqrt(1 + 1) * @beta
+        Gauss::Distribution.inv_cdf(0.5 * (@draw_probability + 1)) * Math.sqrt(1 + 1) * @beta
       end
 
       # Updates the skills of the players inplace
       #
       # @return [Float] the probability of the games outcome
       def update_skills
-        #puts " vorher = #{@layers.map(&:input).inspect}}"
+        # puts " vorher = #{@layers.map(&:input).inspect}}"
         build_layers
         run_schedule
         @teams.each_with_index do |team, i|
@@ -110,10 +105,9 @@ module Saulabs
           end
         end
         ranking_probability
-
       end
 
-    private
+      private
 
       def ranking_probability
         # factor_list = []
@@ -139,7 +133,6 @@ module Saulabs
           layer.input = output
           layer.build
           output = layer.output
-
         end
       end
 
@@ -147,8 +140,6 @@ module Saulabs
         schedules = @layers.map(&:prior_schedule) + @layers.reverse.map(&:posterior_schedule)
         Schedules::Sequence.new(schedules.compact).visit
       end
-
     end
-
   end
 end

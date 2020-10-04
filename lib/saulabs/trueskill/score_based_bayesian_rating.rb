@@ -1,9 +1,6 @@
-# -*- encoding : utf-8 -*-
 module Saulabs
   module TrueSkill
-
     class ScoreBasedBayesianRating
-
       # @return [Array<Array<TrueSkill::Rating>>]
       attr_reader :teams
 
@@ -19,13 +16,8 @@ module Saulabs
       # @return [Float]
       attr_reader :gamma_squared
 
-
       # @return [Boolean]
       attr_reader :skills_additive
-
-
-
-
 
       # Creates a new skill estimate for given scores and team configuration based on the given game parameters
       # Works for the special case: two teams
@@ -66,64 +58,56 @@ module Saulabs
       #  # update the Ratings
       #  graph.update_skills
 
-    def initialize(score_teams_hash, options = {})
-      @teams  = score_teams_hash.keys
-      @scores = score_teams_hash.values
-      raise "teams.size should be 2: this implementation of the score based bayesian rating only works for two teams" unless @teams.size == 2
+      def initialize(score_teams_hash, options = {})
+        @teams = score_teams_hash.keys
+        @scores = score_teams_hash.values
+        raise "teams.size should be 2: this implementation of the score based bayesian rating only works for two teams" unless @teams.size == 2
 
-      opts = {
-            :beta => 25/6.0,
-            :skills_additive => true
-            }.merge(options)
-      @beta = opts[:beta]
-      @beta_squared = @beta**2
+        opts = {
+          beta: 25 / 6.0,
+          skills_additive: true
+        }.merge(options)
+        @beta = opts[:beta]
+        @beta_squared = @beta**2
 
-      @skills_additive = opts[:skills_additive]
+        @skills_additive = opts[:skills_additive]
 
-      @gamma = options[:gamma] || 0.1
-      @gamma_squared = @gamma * @gamma
+        @gamma = options[:gamma] || 0.1
+        @gamma_squared = @gamma * @gamma
 
-      @teams = teams
+        @teams = teams
+      end
 
-    end
-
-    def update_skills
-        #game can be 1vs1, 1vs2, 1vs3 or 2vs2
+      def update_skills
+        # game can be 1vs1, 1vs2, 1vs3 or 2vs2
         #
 
-        #team1 vs team2
+        # team1 vs team2
         # if @skills_additive = true: no averaging of skills and variance
         # otherwise: mean and skill_deviation averaged over team sizes
-        n_team_1    = @skills_additive ? 1 : @teams[0].size.to_f
-        n_team_2    = @skills_additive ? 1 : @teams[1].size.to_f
+        n_team_1 = @skills_additive ? 1 : @teams[0].size.to_f
+        n_team_2 = @skills_additive ? 1 : @teams[1].size.to_f
 
-        n_all       = @teams[0].size.to_f + @teams[1].size.to_f
-        var_team_1  = @teams[0].inject(0){|sum,item| sum + item.variance}
-        var_team_2  = @teams[1].inject(0){|sum,item| sum + item.variance}
-        mean_team_1 = @teams[0].inject(0){|sum,item| sum + item.mean}
-        mean_team_2 = @teams[1].inject(0){|sum,item| sum + item.mean}
+        n_all = @teams[0].size.to_f + @teams[1].size.to_f
+        var_team_1 = @teams[0].inject(0) { |sum, item| sum + item.variance}
+        var_team_2 = @teams[1].inject(0) { |sum, item| sum + item.variance}
+        mean_team_1 = @teams[0].inject(0) { |sum, item| sum + item.mean}
+        mean_team_2 = @teams[1].inject(0) { |sum, item| sum + item.mean}
 
-
-
-
-        @teams[0].map!{|rating|
-          precision = 1.0 / rating.variance + 1.0/ ( n_all * @beta_squared + 2.0 * @gamma_squared + var_team_2 / n_team_2 + var_team_1 / n_team_1 - rating.variance / n_team_1)
-          precision_mean = rating.mean / rating.variance + (@scores[0] - @scores[1] + n_team_1 * (mean_team_2 / n_team_2 - mean_team_1 / n_team_1 + rating.mean / n_team_1)) / ( n_all * @beta_squared + 2.0 * @gamma_squared + var_team_2 / n_team_2 + var_team_1 / n_team_1 - rating.variance / n_team_1)
-          partial_updated_precision = rating.precision + rating.activity*( precision - rating.precision)
-          partial_updated_precision_mean =  rating.precision_mean + rating.activity * (precision_mean - rating.precision_mean)
-          Rating.new(partial_updated_precision_mean / partial_updated_precision, ( 1.0 / partial_updated_precision + rating.tau_squared)**0.5, rating.activity, rating.tau)
-        }
-        @teams[1].map!{|rating|
-          precision = 1.0 / rating.variance + 1.0 / (n_all*@beta_squared + 2.0 * @gamma_squared + var_team_1 / n_team_1 + var_team_2 / n_team_2 - rating.variance / n_team_2)
-          precision_mean = rating.mean / rating.variance + (@scores[1] - @scores[0] + n_team_2 * (mean_team_1 / n_team_1 - mean_team_2 / n_team_2 + rating.mean / n_team_2)) / ( n_all * @beta_squared + 2.0 * @gamma_squared + var_team_1 / n_team_1 + var_team_2/n_team_2 - rating.variance / n_team_2)
-          partial_updated_precision = rating.precision + rating.activity*( precision - rating.precision)
-          partial_updated_precision_mean =  rating.precision_mean + rating.activity * (precision_mean - rating.precision_mean)
+        @teams[0].map! do |rating|
+          precision = 1.0 / rating.variance + 1.0 / (n_all * @beta_squared + 2.0 * @gamma_squared + var_team_2 / n_team_2 + var_team_1 / n_team_1 - rating.variance / n_team_1)
+          precision_mean = rating.mean / rating.variance + (@scores[0] - @scores[1] + n_team_1 * (mean_team_2 / n_team_2 - mean_team_1 / n_team_1 + rating.mean / n_team_1)) / (n_all * @beta_squared + 2.0 * @gamma_squared + var_team_2 / n_team_2 + var_team_1 / n_team_1 - rating.variance / n_team_1)
+          partial_updated_precision = rating.precision + rating.activity * (precision - rating.precision)
+          partial_updated_precision_mean = rating.precision_mean + rating.activity * (precision_mean - rating.precision_mean)
+          Rating.new(partial_updated_precision_mean / partial_updated_precision, (1.0 / partial_updated_precision + rating.tau_squared)**0.5, rating.activity, rating.tau)
+        end
+        @teams[1].map! { |rating|
+          precision = 1.0 / rating.variance + 1.0 / (n_all * @beta_squared + 2.0 * @gamma_squared + var_team_1 / n_team_1 + var_team_2 / n_team_2 - rating.variance / n_team_2)
+          precision_mean = rating.mean / rating.variance + (@scores[1] - @scores[0] + n_team_2 * (mean_team_1 / n_team_1 - mean_team_2 / n_team_2 + rating.mean / n_team_2)) / (n_all * @beta_squared + 2.0 * @gamma_squared + var_team_1 / n_team_1 + var_team_2 / n_team_2 - rating.variance / n_team_2)
+          partial_updated_precision = rating.precision + rating.activity * (precision - rating.precision)
+          partial_updated_precision_mean = rating.precision_mean + rating.activity * (precision_mean - rating.precision_mean)
           Rating.new(partial_updated_precision_mean / partial_updated_precision, (1.0 / partial_updated_precision + rating.tau_squared)**0.5, rating.activity, rating.tau)
         }
-
-
-
-
       end
     end
   end

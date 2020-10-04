@@ -1,26 +1,23 @@
-# -*- encoding : utf-8 -*-
 module Saulabs
   module TrueSkill
     # @private
     module Factors
-      
       # @private
       class Within < Base
-        
         def initialize(epsilon, variable)
           super()
           @epsilon = epsilon
-          bind(variable) 
+          bind(variable)
         end
-        
+
         def log_normalization
           msg = @variables[0] / @messages[0]
           mean = msg.mean
           dev = msg.deviation
           z = Gauss::Distribution.cdf((@epsilon - mean) / dev) - Gauss::Distribution.cdf((-@epsilon - mean) / dev)
           -Gauss::Distribution.log_product_normalization(msg, @messages[0]) + Math.log(z)
-         end
-        
+        end
+
         def update_message_at(index)
           message = @messages[index]
           variable = @variables[index]
@@ -38,11 +35,9 @@ module Saulabs
           diff = new_marginal - variable
           message.replace(new_message)
           variable.replace(new_marginal)
-          return diff
+          diff
         end
-        
       end
-      
     end
   end
 end

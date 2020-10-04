@@ -1,17 +1,14 @@
-# -*- encoding : utf-8 -*-
 module Saulabs
   module TrueSkill
     # @private
     module Schedules
-      
       # @private
       class Loop < Base
-        
         def initialize(schedule, max_delta)
           @schedule = schedule
           @max_delta = max_delta
         end
-        
+
         def visit(depth = -1, max_depth = 0)
           iterations = 1
           delta = @schedule.visit(depth + 1, max_depth)
@@ -21,9 +18,7 @@ module Saulabs
           end
           delta
         end
-        
       end
-      
     end
   end
 end

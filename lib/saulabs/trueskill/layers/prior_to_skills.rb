@@ -1,12 +1,9 @@
-# -*- encoding : utf-8 -*-
 module Saulabs
   module TrueSkill
     # @private
     module Layers
-
       # @private
       class PriorToSkills < Base
-
         def initialize(graph, teams)
           super(graph)
           @teams = teams
@@ -27,9 +24,7 @@ module Saulabs
         def prior_schedule
           Schedules::Sequence.new(@factors.map { |f| Schedules::Step.new(f, 0) })
         end
-
       end
-
     end
   end
 end
