@@ -4,7 +4,7 @@ describe Saulabs::TrueSkill::FactorGraph, "Unit Tests" do
   before :each do
     @teams = create_teams
     @skill = @teams[0][0]
-    @results = {@team1 => 1, @team2 => 2, @team3 => 3}
+    @results = {@team2 => 2, @team1 => 1, @team3 => 3}
     @graph = TrueSkill::FactorGraph.new(@results)
   end
 

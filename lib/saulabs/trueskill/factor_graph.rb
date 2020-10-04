@@ -62,8 +62,9 @@ module Saulabs
       #  graph.update_skills
       #
       def initialize(ranks_teams_hash, options = {})
-        @teams = ranks_teams_hash.keys
-        @ranks = ranks_teams_hash.values
+        sorted_ranks_teams_hash = ranks_teams_hash.sort_by { |k, v| v }.to_h
+        @teams = sorted_ranks_teams_hash.keys
+        @ranks = sorted_ranks_teams_hash.values
 
         opts = {
           beta: 25 / 6.0,
